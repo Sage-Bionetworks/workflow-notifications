@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Backup EC2 with the Data Lifecycle Manager
+Parameters:
+  WorkflowNotifactions:
+    Description: "Group of resources that describe the workflow notification stack"
+    Type: String
+Resources:
+  WorkflowStartSuccessFilter:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: "WorkflowManagerActor Successfully started"
+      LogGroupName: "cromwell-server"
+      MetricTransformations: 
+        -
+          DefaultValue: "0"
+          MetricName: "cromwell-workflow-start-success"
+          MetricNamespace: "cromwell"
+          MetricValue: "1"
+  WorkflowFailedStateFilter:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: "is in a terminal state: WorkflowFailedState"
+      LogGroupName: "cromwell-server"
+      MetricTransformations: 
+        -
+          DefaultValue: "0"
+          MetricName: "cromwell-workflow-failed"
+          MetricNamespace: "cromwell"
+          MetricValue: "1"
+        
