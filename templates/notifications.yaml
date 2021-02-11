@@ -17,6 +17,7 @@ Resources:
           MetricName: "cromwell-workflow-start-success"
           MetricNamespace: "cromwell"
           MetricValue: "1"
+
   WorkflowFailedStateFilter:
     Type: 'AWS::Logs::MetricFilter'
     Properties: 
@@ -28,4 +29,17 @@ Resources:
           MetricName: "cromwell-workflow-failed"
           MetricNamespace: "cromwell"
           MetricValue: "1"
-        
+
+  WorkflowStartSuccessAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Cromwell server successfully started a workflow"
+      AlarmName: "cromwell-server-start-success"
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: "cromwell-workflow-start-success"
+      Namespace: "cromwell"
+      Period: 60
+      Statistic: "Maximum"
+      Threshold: "1.0"
+      TreatMissingData: "missing"
