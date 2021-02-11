@@ -2,9 +2,12 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   Backup EC2 with the Data Lifecycle Manager
 Parameters:
-  WorkflowNotifactions:
+  WorkflowNotifications:
     Description: "Group of resources that describe the workflow notification stack"
     Type: String
+  NotificationEmail:
+    Type: String
+
 Resources:
   WorkflowStartSuccessFilter:
     Type: AWS::Logs::MetricFilter
@@ -39,6 +42,24 @@ Resources:
       EvaluationPeriods: 1
       MetricName: "cromwell-workflow-start-success"
       Namespace: "cromwell"
+      OKActions:
+        - !Ref "WorkflowNotificationTopic"
+      Period: 60
+      Statistic: "Maximum"
+      Threshold: "1.0"
+      TreatMissingData: "missing"
+  
+  WorkflowFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Cromwell workflow failed"
+      AlarmName: "cromwell-server-workflow-failure"
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: "cromwell-workflow-failed"
+      Namespace: "cromwell"
+      AlarmActions:
+        - !Ref "WorkflowNotificationTopic"
       Period: 60
       Statistic: "Maximum"
       Threshold: "1.0"
@@ -49,3 +70,10 @@ Resources:
     Properties:
       DisplayName: "cromwell-server"
       FifoTopic: false
+
+  WorkflowNotificationSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref "NotificationEmail"
+      Protocol: "email"
+      TopicArn: !Ref "WorkflowNotificationTopic"
